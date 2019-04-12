@@ -61,7 +61,25 @@ namespace Entrada
             byte[] buffer = e.Buffer;
             int bytesGrabados = e.BytesRecorded;
             float acumulador = 0.0f;
-            for(int i=0; i<bytesGrabados; i += 2)
+
+            double numeroDeMuestras = bytesGrabados / 2.0f;
+            int exponente = 1;
+            int numeroDeMuestrasComplejas = 0;
+            int bitsMaximos = 0;
+
+            do
+            {
+                bitsMaximos = (int)Math.Pow(2, exponente);
+                exponente++;
+            } while (bitsMaximos < numeroDeMuestras);
+
+            numeroDeMuestrasComplejas = bitsMaximos / 2;
+            exponente--;
+
+            Complex[] señalComleja = new Complex[numeroDeMuestrasComplejas];
+
+
+            for (int i=0; i<bytesGrabados; i += 2)
             {
                 //Transformando 2  bytes separados en una muestra de 16 bits 
                 //1.- Toma el segundo byte y le antepone 8 0's al principio.
@@ -70,9 +88,18 @@ namespace Entrada
 
                 float muestra32bits = (float)muestra / 327668.0f;
                 acumulador += Math.Abs(muestra32bits);
+
+                if(i/2 < numeroDeMuestrasComplejas)
+                {
+                    señalComleja[i / 2].X = muestra32bits;
+                }
+
             }
             float promedio = acumulador / (bytesGrabados / 2.0f);
             sldMicrofono.Value = (double)promedio;
+
+            //FastFourierTransform.FFT()
+
 
 
         }
